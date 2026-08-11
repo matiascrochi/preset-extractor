@@ -1,0 +1,5 @@
+{
+  "name": "PresetCraft AI - Video Specs & Adobe Export Presets",
+  "description": "Análisis técnico de video y generador de presets de exportación (.epr, .jsx) para Adobe Premiere Pro, Media Encoder y After Effects. Funciona 100% local como app de escritorio para Windows.",
+  "requestFramePermissions": []
+}
