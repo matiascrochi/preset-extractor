@@ -1,4 +1,4 @@
-# PresetCraft AI — Video Specs & Adobe Export Preset Generator
+# Preset Extractor — Video Specs & Adobe Export Preset Generator
 
 Desktop app (Windows, via Electron) that inspects a local video file directly in the browser engine
 (HTML5 `<video>`, `<canvas>`, and `AudioContext` — no server, no network, no API key) and generates

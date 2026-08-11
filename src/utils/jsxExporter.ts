@@ -8,7 +8,7 @@ export function generateAfterEffectsJsxScript(preset: PresetConfig): string {
 
   return `/* 
   ========================================================================
-  PresetCraft AI - After Effects Render Queue Setup Script (.jsx)
+  Preset Extractor - After Effects Render Queue Setup Script (.jsx)
   Generado el: ${nowStr}
   ========================================================================
   Instrucciones de uso en After Effects:
@@ -21,14 +21,14 @@ export function generateAfterEffectsJsxScript(preset: PresetConfig): string {
   ========================================================================
 */
 
-(function createRenderQueueItemFromPresetCraft() {
-  app.beginUndoGroup("PresetCraft AI Render Queue Setup");
+(function createRenderQueueItemFromPresetExtractor() {
+  app.beginUndoGroup("Preset Extractor Render Queue Setup");
 
   try {
     var comp = app.project.activeItem;
 
     if (!comp || !(comp instanceof CompItem)) {
-      alert("⚠️ Error: Por favor, selecciona una composición activa en la ventana de Proyecto o Línea de Tiempo antes de ejecutar el guión.", "PresetCraft AI");
+      alert("⚠️ Error: Por favor, selecciona una composición activa en la ventana de Proyecto o Línea de Tiempo antes de ejecutar el guión.", "Preset Extractor");
       app.endUndoGroup();
       return;
     }
@@ -60,11 +60,11 @@ export function generateAfterEffectsJsxScript(preset: PresetConfig): string {
             "• Fotogramas: " + comp.frameRate + " fps\\n" +
             "• Bitrate Objetivo: ${preset.targetBitrateMbps} Mbps\\n" +
             "• Normalización Audio: ${preset.normalizeAudio ? preset.targetLufs + " LUFS (" + (preset.loudnessStandard || "ITU-R BS.1770-4") + ")" : "Sin Normalización"}\\n\\n" +
-            "Revisa la pestaña Cola de Renderizado para exportar tu vídeo.", "PresetCraft AI");
+            "Revisa la pestaña Cola de Renderizado para exportar tu vídeo.", "Preset Extractor");
     }
 
   } catch (err) {
-    alert("❌ Ocurrió un error al ejecutar el guión: " + err.toString(), "PresetCraft AI Error");
+    alert("❌ Ocurrió un error al ejecutar el guión: " + err.toString(), "Preset Extractor Error");
   }
 
   app.endUndoGroup();
@@ -86,7 +86,7 @@ export function downloadJsxFile(preset: PresetConfig) {
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = `AE_Script_${sanitizedFilename || "PresetCraft"}.jsx`;
+  a.download = `AE_Script_${sanitizedFilename || "PresetExtractor"}.jsx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

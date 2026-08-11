@@ -76,7 +76,7 @@ export const PresetExportBar: React.FC<PresetExportBarProps> = ({
       videoSpecs: specs,
       aiDiagnosticReport: report,
       exportedAt: new Date().toISOString(),
-      generatedBy: "PresetCraft AI",
+      generatedBy: "Preset Extractor",
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);

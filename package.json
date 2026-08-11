@@ -36,8 +36,8 @@
     "wait-on": "^8.0.1"
   },
   "build": {
-    "appId": "com.presetcraft.ai.desktop",
-    "productName": "PresetCraft AI",
+    "appId": "com.presetextractor.desktop",
+    "productName": "Preset Extractor",
     "files": [
       "dist/**/*",
       "electron/**/*"

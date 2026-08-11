@@ -17,7 +17,7 @@ export function generateEprPresetXml(preset: PresetConfig, specs?: VideoSpecs): 
   const nowStr = new Date().toISOString();
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<!-- PresetCraft AI - Adobe Premiere Pro & Media Encoder Export Preset -->
+<!-- Preset Extractor - Adobe Premiere Pro & Media Encoder Export Preset -->
 <!-- Generado el: ${nowStr} -->
 <PremiereData Version="10.0">
   <ExportPreset ObjectRef="1">
@@ -83,7 +83,7 @@ export function generateEprPresetXml(preset: PresetConfig, specs?: VideoSpecs): 
       </AudioFormat>
 
       <Metadata>
-        <Creator>PresetCraft AI</Creator>
+        <Creator>Preset Extractor</Creator>
         <SourceResolution>${preset.width}x${preset.height}</SourceResolution>
         <SourceFPS>${preset.fps}</SourceFPS>
       </Metadata>
@@ -100,7 +100,7 @@ export function getEprFileName(preset: PresetConfig): string {
   const sanitizedFilename = preset.presetName
     .replace(/[^a-zA-Z0-9_\-\.\s]/g, "")
     .replace(/\s+/g, "_");
-  return `${sanitizedFilename || "PresetCraft_Export"}.epr`;
+  return `${sanitizedFilename || "PresetExtractor_Export"}.epr`;
 }
 
 /**
