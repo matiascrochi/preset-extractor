@@ -190,42 +190,78 @@ export async function inspectVideoFile(file: File): Promise<VideoSpecs> {
 
         URL.revokeObjectURL(videoUrl);
 
-        // Audio detection & loudness measurement
+        // Audio detection & loudness measurement.
+        //
+        // Preferred path: inside Electron, hand the real file off to the main process,
+        // which runs ffmpeg's `ebur128` filter over the FULL decoded audio track — a
+        // proper ITU-R BS.1770 / EBU R128 measurement (K-weighted, gated), the same
+        // technique the "transcode" reporting tool uses. This is what actually fixes
+        // inaccurate readings.
+        //
+        // Fallback (no Electron, or ffmpeg failed): a rough RMS-based estimate over
+        // whatever the browser can decode. This is only ever an approximation — it
+        // isn't K-weighted/gated, and for many camera-original MP4/MOV files the
+        // `moov` atom sits at the end of the file, so decoding just the first few MB
+        // fails outright and we fall through to a plausible default instead of a
+        // measurement. It exists so the UI still shows *something* reasonable.
         const hasAudio = true;
         let lufs = -14.2;
         let truePeakDb = -1.0;
+        let lufsSource: "measured" | "estimated" = "estimated";
 
-        try {
-          const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const slice = file.slice(0, 4000000); // 4MB slice
-          const buffer = await slice.arrayBuffer();
-          const audioBuffer = await audioCtx.decodeAudioData(buffer);
-
-          let sumSquares = 0;
-          let maxAbs = 0;
-          let totalSamples = 0;
-
-          for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
-            const data = audioBuffer.getChannelData(c);
-            const step = Math.max(1, Math.floor(data.length / 40000));
-            for (let i = 0; i < data.length; i += step) {
-              const val = data[i];
-              const absVal = Math.abs(val);
-              if (absVal > maxAbs) maxAbs = absVal;
-              sumSquares += val * val;
-              totalSamples++;
+        let measuredByFfmpeg = false;
+        if (window.presetAPI?.isElectron && window.presetAPI.getPathForFile && window.presetAPI.analyzeLoudness) {
+          try {
+            const filePath = window.presetAPI.getPathForFile(file);
+            if (filePath) {
+              const result = await window.presetAPI.analyzeLoudness(filePath);
+              if (result.success && result.lufs !== undefined) {
+                lufs = result.lufs;
+                if (result.truePeakDb !== undefined) truePeakDb = result.truePeakDb;
+                lufsSource = "measured";
+                measuredByFfmpeg = true;
+              } else {
+                console.warn("ffmpeg loudness analysis failed, falling back to estimate:", result.error);
+              }
             }
+          } catch (e) {
+            console.warn("ffmpeg loudness analysis threw, falling back to estimate:", e);
           }
+        }
 
-          if (totalSamples > 0 && sumSquares > 0) {
-            const rms = Math.sqrt(sumSquares / totalSamples);
-            const rmsDb = 20 * Math.log10(rms || 0.0001);
-            lufs = Number(Math.max(-40, Math.min(-6, rmsDb - 0.69)).toFixed(1));
-            truePeakDb = Number(Math.max(-30, Math.min(0, 20 * Math.log10(maxAbs || 0.0001))).toFixed(1));
+        if (!measuredByFfmpeg) {
+          try {
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const slice = file.slice(0, 4000000); // 4MB slice
+            const buffer = await slice.arrayBuffer();
+            const audioBuffer = await audioCtx.decodeAudioData(buffer);
+
+            let sumSquares = 0;
+            let maxAbs = 0;
+            let totalSamples = 0;
+
+            for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
+              const data = audioBuffer.getChannelData(c);
+              const step = Math.max(1, Math.floor(data.length / 40000));
+              for (let i = 0; i < data.length; i += step) {
+                const val = data[i];
+                const absVal = Math.abs(val);
+                if (absVal > maxAbs) maxAbs = absVal;
+                sumSquares += val * val;
+                totalSamples++;
+              }
+            }
+
+            if (totalSamples > 0 && sumSquares > 0) {
+              const rms = Math.sqrt(sumSquares / totalSamples);
+              const rmsDb = 20 * Math.log10(rms || 0.0001);
+              lufs = Number(Math.max(-60, Math.min(-3, rmsDb - 0.69)).toFixed(1));
+              truePeakDb = Number(Math.max(-30, Math.min(0, 20 * Math.log10(maxAbs || 0.0001))).toFixed(1));
+            }
+            await audioCtx.close();
+          } catch (e) {
+            console.warn("Audio Loudness measurement fallback:", e);
           }
-          await audioCtx.close();
-        } catch (e) {
-          console.warn("Audio Loudness measurement fallback:", e);
         }
 
         resolve({
@@ -249,6 +285,7 @@ export async function inspectVideoFile(file: File): Promise<VideoSpecs> {
           hasAudio,
           lufs,
           truePeakDb,
+          lufsSource,
         });
       } catch (err) {
         URL.revokeObjectURL(videoUrl);

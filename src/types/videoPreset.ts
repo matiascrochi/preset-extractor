@@ -17,8 +17,9 @@ export interface VideoSpecs {
   container: string; // "MP4", "MOV", "WebM", "MKV", "MXF"
   frameSnapshotBase64?: string;
   hasAudio: boolean;
-  lufs?: number; // Measured integrated loudness e.g. -14.2 LUFS
-  truePeakDb?: number; // Measured true peak e.g. -1.1 dBTP
+  lufs?: number; // Integrated loudness e.g. -14.2 LUFS
+  truePeakDb?: number; // True peak e.g. -1.1 dBTP
+  lufsSource?: "measured" | "estimated"; // "measured" = real ffmpeg ebur128 analysis, "estimated" = browser RMS approximation fallback
 }
 
 export interface PresetConfig {
