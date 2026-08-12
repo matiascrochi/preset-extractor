@@ -130,7 +130,25 @@ export const VideoSpecsCard: React.FC<VideoSpecsCardProps> = ({ specs }) => {
           </div>
 
           <div className="bg-[#111111] p-4 flex justify-between items-end border-b border-white/10">
-            <span className="text-xs uppercase font-mono tracking-wider opacity-40">Detected Loudness</span>
+            <span className="text-xs uppercase font-mono tracking-wider opacity-40 flex items-center gap-1.5">
+              Detected Loudness
+              {specs.lufsSource && (
+                <span
+                  className={`text-[9px] font-black px-1.5 py-0.5 rounded normal-case tracking-normal ${
+                    specs.lufsSource === "measured"
+                      ? "bg-[#00FF41]/15 text-[#00FF41]"
+                      : "bg-yellow-500/15 text-yellow-400"
+                  }`}
+                  title={
+                    specs.lufsSource === "measured"
+                      ? "Medido con ffmpeg (ITU-R BS.1770 / EBU R128) sobre el audio completo"
+                      : "Estimación aproximada (no se pudo medir con ffmpeg)"
+                  }
+                >
+                  {specs.lufsSource === "measured" ? "MEDIDO" : "ESTIMADO"}
+                </span>
+              )}
+            </span>
             <span className="text-lg sm:text-xl font-black font-mono text-[#00FF41] uppercase flex items-center gap-1">
               <span>{specs.lufs !== undefined ? `${specs.lufs} LUFS` : "-14.0 LUFS"}</span>
               <span className="text-xs text-white/40 font-bold">({specs.truePeakDb !== undefined ? `${specs.truePeakDb} dBTP` : "-1.0 dBTP"})</span>
