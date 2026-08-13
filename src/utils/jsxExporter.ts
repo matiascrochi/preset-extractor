@@ -50,7 +50,7 @@ export function generateAfterEffectsJsxScript(preset: PresetConfig): string {
       
       // Aplicar nombre de preset en la plantilla si existe
       try {
-        om.applyTemplate("${preset.format === "ProRes" ? "Lossless" : "H.264"}");
+        om.applyTemplate("${preset.format === "ProRes" || preset.format === "ProRes MXF" || preset.format === "DNxHR" || preset.format === "MXF OP1a" ? "Lossless" : "H.264"}");
       } catch (e) {
         // Fallback a plantilla estándar
       }

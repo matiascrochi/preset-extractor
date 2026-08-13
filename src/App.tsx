@@ -95,10 +95,28 @@ export default function App() {
       ? "DNxHR"
       : "H.264";
 
+    // Match the source's own ProRes variant when we can identify it, so a ProRes
+    // master round-trips at the same quality tier instead of silently defaulting.
+    // Order matters: "422 HQ" must be tested before the bare "422" substring.
+    const proResVariant: PresetConfig["proResVariant"] = !specs.codec.includes("ProRes")
+      ? undefined
+      : specs.codec.includes("4444 XQ")
+      ? "ProRes 4444 XQ"
+      : specs.codec.includes("4444")
+      ? "ProRes 4444"
+      : specs.codec.includes("Proxy")
+      ? "ProRes 422 Proxy"
+      : specs.codec.includes("LT")
+      ? "ProRes 422 LT"
+      : specs.codec.includes("HQ")
+      ? "ProRes 422 HQ"
+      : "ProRes 422";
+
     return {
       presetName: `Preset_${cleanName}_${specs.width}x${specs.height}`,
       softwareTarget: "all",
       format,
+      proResVariant,
       width: specs.width,
       height: specs.height,
       fps: specs.fps,
@@ -121,8 +139,13 @@ export default function App() {
       // Audio Normalization & Loudness matching detected video target
       normalizeAudio: true,
       targetLufs: specs.lufs !== undefined ? specs.lufs : -14.0,
-      loudnessStandard: "ITU-R BS.1770-4",
-      maxTruePeakDb: specs.truePeakDb !== undefined ? specs.truePeakDb : -1.0,
+      // A -23 LUFS target is the EBU R128 broadcast reference (matches how real
+      // broadcast presets are authored); other targets default to the ITU-R base spec.
+      loudnessStandard: specs.lufs !== undefined && Math.abs(specs.lufs - -23) < 0.5 ? "EBU R128" : "ITU-R BS.1770-4",
+      // Delivery ceiling for the output limiter — a fixed spec value, NOT the source's
+      // own measured true peak (specs.truePeakDb). -1 dBTP is the EBU R128 / broadcast
+      // standard ceiling; the user can override it in the configurator if their spec differs.
+      maxTruePeakDb: -1.0,
     };
   };
 

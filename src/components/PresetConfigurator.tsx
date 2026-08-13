@@ -84,10 +84,32 @@ export const PresetConfigurator: React.FC<PresetConfiguratorProps> = ({
             >
               <option value="H.264">H.264 (AVC - Web & Social)</option>
               <option value="HEVC">HEVC / H.265 (High Efficiency 4K)</option>
-              <option value="ProRes">Apple ProRes 422 (Pro Master)</option>
-              <option value="DNxHR">Avid DNxHR (Broadcast Spec)</option>
+              <option value="ProRes">Apple ProRes .MOV (Pro Master)</option>
+              <option value="ProRes MXF">Apple ProRes MXF OP1a (Broadcast)</option>
+              <option value="DNxHR">Avid DNxHR MXF (Broadcast Spec)</option>
+              <option value="MXF OP1a">MXF OP1a / XDCAM (Broadcast Delivery)</option>
             </select>
           </div>
+
+          {(preset.format === "ProRes" || preset.format === "ProRes MXF") && (
+            <div>
+              <label className="block text-xs font-black font-mono text-white/50 uppercase tracking-widest mb-2">
+                ProRes Variant
+              </label>
+              <select
+                value={preset.proResVariant || "ProRes 422 HQ"}
+                onChange={(e) => updateField("proResVariant", e.target.value as any)}
+                className="w-full px-3 py-3 rounded-lg bg-black border border-white/20 text-white font-mono text-xs font-bold focus:outline-none focus:border-[#00FF41]"
+              >
+                <option value="ProRes 422 Proxy">422 Proxy (Offline / Lightest)</option>
+                <option value="ProRes 422 LT">422 LT (Light)</option>
+                <option value="ProRes 422">422 (Standard)</option>
+                <option value="ProRes 422 HQ">422 HQ (Broadcast Master)</option>
+                <option value="ProRes 4444">4444 (Alpha / Grading)</option>
+                <option value="ProRes 4444 XQ">4444 XQ (Highest Quality)</option>
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-black font-mono text-white/50 uppercase tracking-widest mb-2">

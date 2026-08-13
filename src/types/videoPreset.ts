@@ -22,10 +22,23 @@ export interface VideoSpecs {
   lufsSource?: "measured" | "estimated"; // "measured" = real ffmpeg ebur128 analysis, "estimated" = browser RMS approximation fallback
 }
 
+/**
+ * Apple ProRes codec variants, in ascending quality order. These map 1:1 to the
+ * QuickTime FourCC codes Adobe stores in .epr files (apco/apcs/apcn/apch/ap4h/ap4x) —
+ * all six verified against Adobe's own factory ProRes presets.
+ */
+export type ProResVariant =
+  | "ProRes 422 Proxy"
+  | "ProRes 422 LT"
+  | "ProRes 422"
+  | "ProRes 422 HQ"
+  | "ProRes 4444"
+  | "ProRes 4444 XQ";
+
 export interface PresetConfig {
   presetName: string;
   softwareTarget: "premiere" | "media_encoder" | "after_effects" | "all";
-  format: "H.264" | "HEVC" | "ProRes" | "DNxHR" | "QuickTime";
+  format: "H.264" | "HEVC" | "ProRes" | "DNxHR" | "QuickTime" | "MXF OP1a" | "ProRes MXF";
   width: number;
   height: number;
   fps: number;
@@ -37,6 +50,11 @@ export interface PresetConfig {
   maxBitrateMbps: number;
   profile: "Main" | "High" | "High10" | "ProRes 422 HQ" | "ProRes 422" | "ProRes 422 LT" | "DNxHR HQX";
   level: "3.1" | "4.0" | "4.1" | "4.2" | "5.0" | "5.1" | "Auto";
+  // ProRes codec variant, used only when format is "ProRes" or "ProRes MXF". Kept
+  // separate from `profile` because that field carries H.264/HEVC profile semantics
+  // (Main/High) that App.tsx always populates — overloading it meant the ProRes
+  // variant could never actually be expressed.
+  proResVariant?: ProResVariant;
   keyframeInterval: number; // GOP size in frames
   renderAtMaxDepth: boolean;
   useMaxRenderQuality: boolean;
